@@ -1,2 +1,13 @@
 # LarngearLM-Backend
-NotebookLM clone. Backend that can access LLM in docker container and will be connect to Frontend use it like NotebookLM.
+
+Backend that running LLM with backend server. That will connect to Frontend website. Call the API from frontend and this Backend will connect to LLM to do summarize pdf, YouTube link, etc... into paragraph or whatsoever.
+
+## How to start
+
+```python
+uvicorn app.main:app --reload
+```
+
+## TL;DR
+
+It's NotebookLM clone. NotebookLM is one of Google's product.
