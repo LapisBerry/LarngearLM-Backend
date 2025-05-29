@@ -5,10 +5,10 @@ from minio import Minio
 app = FastAPI()
 
 client = Minio(
-    endpoint="localhost:9000",          # 👈 Your local MinIO instance
+    endpoint="localhost:9000",
     access_key="minioadmin",
     secret_key="minioadmin",
-    secure=False                        # 👈 Important! Because it's HTTP, not HTTPS
+    secure=False
 )
 
 # Create a bucket if it doesn't exist

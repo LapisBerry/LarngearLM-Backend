@@ -1,0 +1,16 @@
+title Upload resources
+
+actor User
+participant Frontend
+participant Backend
+database MinIO
+participant LLM
+
+User->Frontend: click upload resources
+
+Frontend->Backend:POST /upload-resources
+
+Backend->MinIO: store in object storage
+
+Frontend<-Backend: response 200 OK
+User<-Frontend: see resources

@@ -1,0 +1,23 @@
+title Give instruction
+
+actor User
+participant Frontend
+participant Backend
+database MinIO
+participant LLM
+
+User->Frontend: give instruction
+User->Frontend: click send
+
+Frontend->Backend:POST /send-instructions
+
+Backend->MinIO: query all resources
+Backend<-MinIO:return all resources
+
+note right of Backend: Processing resources
+Backend->LLM: send instructions + resources
+
+Backend<-LLM: LLM responses
+
+Frontend<-Backend: LLM responses
+User<-Frontend: see LLM responses

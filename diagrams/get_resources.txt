@@ -1,0 +1,17 @@
+title Get resources
+
+actor User
+participant Frontend
+participant Backend
+database MinIO
+participant LLM
+
+User->Frontend: see frontend page
+
+Frontend->Backend:GET /get-resources
+
+Backend->MinIO: query all resources
+Backend<-MinIO: return all resources
+
+Frontend<-Backend: response 200 OK
+User<-Frontend: see resources
