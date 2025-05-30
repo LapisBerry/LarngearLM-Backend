@@ -10,6 +10,10 @@ I worked at Larngear Technology company and I just happen to name it like the co
 uvicorn app.main:app --reload
 ```
 
+## API docs
+
+http://127.0.0.1:8000/docs
+
 ## TL;DR
 
 It's NotebookLM clone. NotebookLM is one of Google's product.
