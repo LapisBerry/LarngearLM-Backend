@@ -12,7 +12,13 @@ uvicorn app.main:app --reload
 
 ## API docs
 
+API docs from FastAPI
+
 http://127.0.0.1:8000/docs
+
+![upload_resources](/diagrams/upload_resources.png)
+![get_resources](/diagrams/get_resources.png)
+![give_instructions](/diagrams/give_instructions.png)
 
 ## TL;DR
 
