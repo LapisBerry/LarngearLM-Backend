@@ -7,6 +7,11 @@ I worked at Larngear Technology company and I just happen to name it like the co
 ## How to start
 
 ```bash
+pip -m venv .venv
+pip install -r requirements.txt
+```
+
+```bash
 uvicorn app.main:app --reload
 ```
 
