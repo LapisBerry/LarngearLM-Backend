@@ -59,3 +59,8 @@ async def upload_resource(uploaded_file: UploadFile):
 async def upload_link_youtube(link: str):
     # Get the YouTube video transcription
     return {"link": link}
+
+@app.delete("/delete-resource/{filename}")
+async def delete_resource(filename: str):
+    client.remove_object(bucket_name="pdfs", object_name=filename)
+    return {"message": f"Resource {filename} deleted successfully."}
