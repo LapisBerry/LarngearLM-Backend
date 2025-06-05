@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from minio import Minio
@@ -7,7 +7,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -19,6 +19,9 @@ client = Minio(
     secret_key="minioadmin",
     secure=False
 )
+bucket_name = "pdfs"
+if not client.bucket_exists(bucket_name):
+    client.make_bucket(bucket_name=bucket_name)
 
 @app.get("/")
 def read_root():
@@ -27,7 +30,7 @@ def read_root():
 @app.get("/get-resources/")
 async def get_resources():
     files = []
-    for obj in client.list_objects(bucket_name="pdfs", recursive=True):
+    for obj in client.list_objects(bucket_name=bucket_name, recursive=True):
         files.append({
             "filename": obj.object_name,
             "size": obj.size,
@@ -39,15 +42,15 @@ async def get_resources():
 @app.get("/get-resource/{filename}")
 async def get_resource(filename: str):
     try:
-        file_data = client.get_object(bucket_name="pdfs", object_name=filename)
+        file_data = client.get_object(bucket_name=bucket_name, object_name=filename)
         return StreamingResponse(file_data, media_type="application/pdf", headers={"Content-Disposition": f"inline; filename={filename}"})
     except Exception as e:
         return {"error": str(e)}
 
 @app.post("/upload-resource/")
-async def upload_resource(uploaded_file: UploadFile):
+async def upload_resource(uploaded_file: UploadFile = File(...)):
     client.put_object(
-        bucket_name="pdfs",
+        bucket_name=bucket_name,
         object_name=uploaded_file.filename,
         data=uploaded_file.file,
         length=uploaded_file.size,
@@ -62,5 +65,5 @@ async def upload_link_youtube(link: str):
 
 @app.delete("/delete-resource/{filename}")
 async def delete_resource(filename: str):
-    client.remove_object(bucket_name="pdfs", object_name=filename)
+    client.remove_object(bucket_name=bucket_name, object_name=filename)
     return {"message": f"Resource {filename} deleted successfully."}
