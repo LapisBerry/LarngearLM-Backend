@@ -7,6 +7,10 @@ I worked at Larngear Technology company and I just happen to name it like the co
 ## How to start
 
 ```bash
+docker compose up -d
+```
+
+```bash
 pip -m venv .venv
 pip install -r requirements.txt
 ```
@@ -19,7 +23,7 @@ uvicorn app.main:app --reload
 
 API docs from FastAPI
 
-http://127.0.0.1:8000/docs
+[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ![upload_resources](/diagrams/upload_resources.png)
 ![get_resources](/diagrams/get_resources.png)
