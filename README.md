@@ -11,6 +11,12 @@ docker compose up -d
 ```
 
 ```bash
+# manually pull llama3.1 model at the first time
+docker exec larngearlm-backend-ollama-1 ollama pull llama3.1:latest
+```
+
+```bash
+# manually create virtual environment at the first time
 pip -m venv .venv
 pip install -r requirements.txt
 ```

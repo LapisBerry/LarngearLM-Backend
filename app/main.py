@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from minio import Minio
+import requests
 
 app = FastAPI()
 
@@ -57,6 +58,18 @@ async def upload_resource(uploaded_file: UploadFile = File(...)):
         content_type=uploaded_file.content_type,
     )
     return {"filename": uploaded_file.filename, "size": uploaded_file.size, "content_type": uploaded_file.content_type}
+
+@app.post("/give-instruction/")
+async def give_instructions(instruction: str):
+    response = requests.post(
+        "http://localhost:11434/api/generate",
+        json={
+            "model": "llama3.1",
+            "prompt": instruction,
+            "stream": False
+        }
+    )
+    return response.json()
 
 @app.delete("/delete-resource/{filename}")
 async def delete_resource(filename: str):
