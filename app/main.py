@@ -58,11 +58,6 @@ async def upload_resource(uploaded_file: UploadFile = File(...)):
     )
     return {"filename": uploaded_file.filename, "size": uploaded_file.size, "content_type": uploaded_file.content_type}
 
-@app.post("/upload-link-youtube/")
-async def upload_link_youtube(link: str):
-    # Get the YouTube video transcription
-    return {"link": link}
-
 @app.delete("/delete-resource/{filename}")
 async def delete_resource(filename: str):
     client.remove_object(bucket_name=bucket_name, object_name=filename)
