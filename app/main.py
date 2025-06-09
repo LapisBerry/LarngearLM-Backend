@@ -3,6 +3,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from minio import Minio
 import requests
+from datetime import timedelta
 
 app = FastAPI()
 
@@ -34,19 +35,17 @@ async def get_resources():
     for obj in client.list_objects(bucket_name=bucket_name, recursive=True):
         files.append({
             "filename": obj.object_name,
+            "url": client.get_presigned_url(
+                method="GET",
+                bucket_name=bucket_name,
+                object_name=obj.object_name,
+                expires=timedelta(minutes=60)
+            ),
             "size": obj.size,
             "last_modified": obj.last_modified.isoformat(),
             "content_type": "application/pdf"
         })
     return {"files": files}
-
-@app.get("/get-resource/{filename}")
-async def get_resource(filename: str):
-    try:
-        file_data = client.get_object(bucket_name=bucket_name, object_name=filename)
-        return StreamingResponse(file_data, media_type="application/pdf", headers={"Content-Disposition": f"inline; filename={filename}"})
-    except Exception as e:
-        return {"error": str(e)}
 
 @app.post("/upload-resource/")
 async def upload_resource(uploaded_file: UploadFile = File(...)):
