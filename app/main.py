@@ -75,7 +75,7 @@ async def give_instructions(instruction: str, selected_file: list[str] = []):
             pdf_document = fitz.open(stream=file.read(), filetype="pdf")
             for page in pdf_document:
                 instructionAndResource += page.get_text()
-            instructionAndResource += "\n<ENDFILE>\n"
+            instructionAndResource += "<ENDFILE>\n"
             file.close()
     print(instructionAndResource)
 
