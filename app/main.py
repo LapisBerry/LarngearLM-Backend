@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from minio import Minio
 import requests
 from datetime import timedelta
+import fitz
 
 app = FastAPI()
 
@@ -57,12 +58,32 @@ async def upload_resource(uploaded_file: UploadFile = File(...)):
     return {"filename": uploaded_file.filename, "size": uploaded_file.size, "content_type": uploaded_file.content_type}
 
 @app.post("/give-instruction/")
-async def give_instructions(instruction: str):
+async def give_instructions(instruction: str, selected_file: list[str] = []):
+
+    instructionAndResource = instruction + "\n\n"
+    if len(selected_file) > 0:
+        instructionAndResource += "Resources:\n"
+        for filename in selected_file:
+            instructionAndResource += f"***\n"
+            instructionAndResource += f"{filename}\n"
+            instructionAndResource += f"***\n"
+            instructionAndResource += f"\n<STARTFILE>\n"
+            file = client.get_object(
+                bucket_name=bucket_name,
+                object_name=filename
+            )
+            pdf_document = fitz.open(stream=file.read(), filetype="pdf")
+            for page in pdf_document:
+                instructionAndResource += page.get_text()
+            instructionAndResource += "\n<ENDFILE>\n"
+            file.close()
+    print(instructionAndResource)
+
     response = requests.post(
         "http://localhost:11434/api/generate",
         json={
             "model": "llama3.1",
-            "prompt": instruction,
+            "prompt": instructionAndResource,
             "stream": False
         }
     )
