@@ -58,12 +58,11 @@ async def upload_resource(uploaded_file: UploadFile = File(...)):
     return {"filename": uploaded_file.filename, "size": uploaded_file.size, "content_type": uploaded_file.content_type}
 
 @app.post("/give-instruction/")
-async def give_instructions(instruction: str, selected_file: list[str] = []):
-
+async def give_instruction(instruction: str, selected_files: list[str] = []):
     instructionAndResource = instruction + "\n\n"
-    if len(selected_file) > 0:
+    if len(selected_files) > 0:
         instructionAndResource += "Resources:\n"
-        for filename in selected_file:
+        for filename in selected_files:
             instructionAndResource += f"***\n"
             instructionAndResource += f"{filename}\n"
             instructionAndResource += f"***\n"
