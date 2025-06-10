@@ -59,6 +59,7 @@ async def upload_resource(uploaded_file: UploadFile = File(...)):
 
 @app.post("/give-instruction/")
 async def give_instruction(instruction: str, selected_files: list[str] = []):
+    print(selected_files)
     instructionAndResource = instruction + "\n\n"
     if len(selected_files) > 0:
         instructionAndResource += "Resources:\n"
@@ -76,7 +77,6 @@ async def give_instruction(instruction: str, selected_files: list[str] = []):
                 instructionAndResource += page.get_text()
             instructionAndResource += "<ENDFILE>\n"
             file.close()
-    print(instructionAndResource)
 
     response = requests.post(
         "http://localhost:11434/api/generate",
