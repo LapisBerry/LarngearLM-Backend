@@ -1,5 +1,4 @@
 from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from minio import Minio
 import requests
@@ -21,7 +20,7 @@ client = Minio(
     secret_key="minioadmin",
     secure=False
 )
-bucket_name = "pdfs"
+bucket_name = "files"
 if not client.bucket_exists(bucket_name):
     client.make_bucket(bucket_name=bucket_name)
 
@@ -42,8 +41,7 @@ async def get_resources():
                 expires=timedelta(minutes=60)
             ),
             "size": obj.size,
-            "last_modified": obj.last_modified.isoformat(),
-            "content_type": "application/pdf"
+            "last_modified": obj.last_modified.isoformat()
         })
     return {"files": files}
 
