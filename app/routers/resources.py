@@ -21,7 +21,7 @@ async def get_resources():
         })
     return {"files": files}
 
-@router.post("/upload")
+@router.post("/")
 async def upload_resource(uploaded_file: UploadFile = File(...)):
     client.put_object(
         bucket_name=bucket_name,
@@ -32,7 +32,7 @@ async def upload_resource(uploaded_file: UploadFile = File(...)):
     )
     return {"filename": uploaded_file.filename, "size": uploaded_file.size, "content_type": uploaded_file.content_type}
 
-@router.delete("/delete/{filename}")
+@router.delete("//{filename}")
 async def delete_resource(filename: str):
     try:
         client.remove_object(bucket_name=bucket_name, object_name=filename)
