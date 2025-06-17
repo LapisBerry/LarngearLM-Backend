@@ -18,7 +18,23 @@ services:
       - "11434:11434"  # Ollama API port
     volumes:
       - ollama_data:/root/.ollama
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    ports:
+      - "5432:5432"   # PostgreSQL default port
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"   # Adminer web interface
 
 volumes:
   minio_data:
   ollama_data:
+  postgres_data:
