@@ -26,6 +26,7 @@ async def get_resources(db: Session = Depends(get_db)):
                     object_name=file.object_name,
                     expires=timedelta(minutes=60),
                 ),
+                "content_type": file.content_type,
                 "size": file.size,
                 "last_modified": file.created_at.isoformat(),
             }
