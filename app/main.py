@@ -1,8 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import resources, generate
+from app.database import create_tables
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+def startup_event():
+    create_tables()
 
 app.add_middleware(
     CORSMiddleware,
