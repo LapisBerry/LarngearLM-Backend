@@ -2,6 +2,9 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from app.utils.minio_client import client, bucket_name
 from datetime import timedelta
 import uuid
+from io import BytesIO
+from youtube_transcript_api import YouTubeTranscriptApi
+from pytube import YouTube
 from app.database import get_db
 from sqlalchemy.orm import Session
 from app.model import FileMetadata
@@ -35,7 +38,9 @@ async def get_resources(db: Session = Depends(get_db)):
 
 
 @router.post("/")
-async def upload_resource(uploaded_file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_resource(
+    uploaded_file: UploadFile = File(...), db: Session = Depends(get_db)
+):
     try:
         object_name = str(uuid.uuid4()) + "_" + uploaded_file.filename
 
@@ -69,16 +74,63 @@ async def upload_resource(uploaded_file: UploadFile = File(...), db: Session = D
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/youtube-transcript/")
+async def create_youtube_transcript(video_url: str, db: Session = Depends(get_db)):
+    try:
+        yt = YouTube(video_url)
+        video_id = yt.video_id
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+
+        content = "\n".join([f"{item['start']} - {item['text']}" for item in transcript]).encode("utf-8")
+        print(content)
+        filename = f"{video_id}_transcript.txt"
+        object_name = str(uuid.uuid4()) + "_" + filename
+
+        # Save the transcript to MinIO
+        client.put_object(
+            bucket_name=bucket_name,
+            object_name=object_name,
+            data=BytesIO(content),
+            length=len(content),
+            content_type="text/plain",
+        )
+
+        # Save metadata to the database
+        file_metadata = FileMetadata(
+            filename=filename,
+            bucket_name=bucket_name,
+            object_name=object_name,
+            content_type="text/plain",
+            size=len(content),
+        )
+        db.add(file_metadata)
+        db.commit()
+        db.refresh(file_metadata)
+
+        return {
+            "message": "YouTube transcript created successfully.",
+            "filename": filename,
+            "size": len(content),
+            "content_type": "text/plain",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.delete("/{fileId}")
 async def delete_resource(fileId: int, db: Session = Depends(get_db)):
     try:
         # search id in the database
         file_metadata = db.query(FileMetadata).filter(FileMetadata.id == fileId).first()
         if not file_metadata:
-            raise HTTPException(status_code=404, detail="File not found in the database.")
-        
+            raise HTTPException(
+                status_code=404, detail="File not found in the database."
+            )
+
         filename = file_metadata.filename
-        client.remove_object(bucket_name=bucket_name, object_name=file_metadata.object_name)
+        client.remove_object(
+            bucket_name=bucket_name, object_name=file_metadata.object_name
+        )
 
         db.delete(file_metadata)
         db.commit()
