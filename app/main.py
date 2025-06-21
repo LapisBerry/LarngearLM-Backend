@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import resources, generate
+from app.routers import resources, generate, notes
 from app.database import create_tables
 
 app = FastAPI()
@@ -21,6 +21,7 @@ app.add_middleware(
 # Include routers
 app.include_router(resources.router, prefix="/resources", tags=["Resource Operations"])
 app.include_router(generate.router, prefix="/generate", tags=["Generate"])
+app.include_router(notes.router, prefix="/notes", tags=["Notes Operations"])
 
 @app.get("/")
 def read_root():

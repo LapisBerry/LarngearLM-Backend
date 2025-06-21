@@ -7,6 +7,10 @@ client = Minio(
     secure=False
 )
 
-bucket_name = "files"
-if not client.bucket_exists(bucket_name):
-    client.make_bucket(bucket_name=bucket_name)
+RESOURCE_BUCKET_NAME = "files"
+NOTE_BUCKET_NAME = "notes"
+if not client.bucket_exists(RESOURCE_BUCKET_NAME):
+    client.make_bucket(bucket_name=RESOURCE_BUCKET_NAME)
+
+if not client.bucket_exists(NOTE_BUCKET_NAME):
+    client.make_bucket(bucket_name=NOTE_BUCKET_NAME)
