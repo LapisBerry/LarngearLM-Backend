@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 import uuid
 from sqlalchemy.orm import Session
 from datetime import timedelta
@@ -36,39 +36,6 @@ async def get_notes(db: Session = Depends(get_db)):
     return {"notes": notes}
 
 
-@router.put("/{note_id}")
-async def update_note(
-    note_id: int,
-    title: str,
-    content: str,
-    db: Session = Depends(get_db),
-):
-    note = db.query(NoteMetadata).filter(NoteMetadata.id == note_id).first()
-    if not note:
-        raise HTTPException(status_code=404, detail="Note not found")
-
-    put_presigned_url = client.get_presigned_url(
-        method="PUT",
-        bucket_name=note.bucket_name,
-        object_name=note.object_name,
-        expires=timedelta(minutes=10),
-    )
-
-    requests.put(
-        url=put_presigned_url,
-        data=content.encode("utf-8"),
-        headers={
-            "Content-Type": note.content_type + "; charset=utf-8"  # ; charset=utf-8 to ensure proper encoding for minio
-        },
-    )
-
-    note.title = title
-    db.commit()
-    db.refresh(note)
-
-    return {"message": "Note updated successfully", "note_id": note.id}
-
-
 @router.post("/")
 async def upload_note(title: str, content: str, db: Session = Depends(get_db)):
     try:
@@ -99,6 +66,40 @@ async def upload_note(title: str, content: str, db: Session = Depends(get_db)):
         return {"message": "Note uploaded successfully", "note_id": note_metadata.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/{note_id}")
+async def update_note(
+    note_id: int,
+    title: str,
+    content: str,
+    db: Session = Depends(get_db),
+):
+    note = db.query(NoteMetadata).filter(NoteMetadata.id == note_id).first()
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+
+    put_presigned_url = client.get_presigned_url(
+        method="PUT",
+        bucket_name=note.bucket_name,
+        object_name=note.object_name,
+        expires=timedelta(minutes=10),
+    )
+
+    requests.put(
+        url=put_presigned_url,
+        data=content.encode("utf-8"),
+        headers={
+            "Content-Type": note.content_type
+            + "; charset=utf-8"  # ; charset=utf-8 to ensure proper encoding for minio
+        },
+    )
+
+    note.title = title
+    db.commit()
+    db.refresh(note)
+
+    return {"message": "Note updated successfully", "note_id": note.id}
 
 
 @router.delete("/{note_id}")
