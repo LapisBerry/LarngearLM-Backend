@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.utils.minio_client import client, bucket_name
+from app.utils.minio_client import client, RESOURCE_BUCKET_NAME
 import fitz
 import requests
 from app.database import get_db
@@ -23,7 +23,7 @@ async def give_instruction(instruction: str, selected_files: list[str] = [], db:
                 object_name = file_metadata.object_name
 
                 # Fetch the file from MinIO
-                file = client.get_object(bucket_name=bucket_name, object_name=object_name)
+                file = client.get_object(bucket_name=RESOURCE_BUCKET_NAME, object_name=object_name)
                 pdf_document = fitz.open(stream=file.read(), filetype="pdf")
                 for page in pdf_document:
                     instructionAndResource += page.get_text()

@@ -1,3 +1,3 @@
-from .minio_client import client, bucket_name
+from .minio_client import client, RESOURCE_BUCKET_NAME
 
-__all__ = ["client", "bucket_name"]
+__all__ = ["client", "RESOURCE_BUCKET_NAME"]
