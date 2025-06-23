@@ -24,9 +24,11 @@ async def give_instruction(instruction: str, selected_files: list[int] = [], db:
 
                 # Fetch the file from MinIO
                 file = client.get_object(bucket_name=bucket_name, object_name=object_name)
-                pdf_document = fitz.open(stream=file.read(), filetype="pdf")
-                for page in pdf_document:
-                    instructionAndResource += page.get_text()
+
+                if file_metadata.content_type == "application/pdf":
+                    instructionAndResource += process_pdf(file)
+                elif file_metadata.content_type == "text/plain":
+                    instructionAndResource += process_text(file)
                 instructionAndResource += "<ENDFILE>\n"
                 file.close()
             except Exception as e:
@@ -41,3 +43,13 @@ async def give_instruction(instruction: str, selected_files: list[int] = [], db:
         }
     )
     return response.json()
+
+def process_pdf(file):
+    pdf_document = fitz.open(stream=file.read(), filetype="pdf")
+    text = ""
+    for page in pdf_document:
+        text += page.get_text()
+    return text
+
+def process_text(file):
+    return file.read().decode("utf-8")
