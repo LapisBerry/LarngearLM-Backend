@@ -9,7 +9,7 @@ from app.model import FileMetadata
 router = APIRouter()
 
 @router.post("/")
-async def give_instruction(instruction: str, selected_files: list[str] = [], db: Session = Depends(get_db)):
+async def give_instruction(instruction: str, selected_files: list[int] = [], db: Session = Depends(get_db)):
     instructionAndResource = instruction + "\n\n"
     if len(selected_files) > 0:
         instructionAndResource += "Resources:\n"
