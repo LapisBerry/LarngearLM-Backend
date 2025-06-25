@@ -82,7 +82,7 @@ async def create_youtube_transcript(video_url: str, db: Session = Depends(get_db
     try:
         yt = YouTube(video_url)
         video_id = yt.video_id
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en", "th"])
 
         content = "\n".join([f"{item['start']} - {item['text']}" for item in transcript]).encode("utf-8")
         print(content)
