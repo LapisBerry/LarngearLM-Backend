@@ -1,11 +1,11 @@
-version: '3.8'
+version: "3.8"
 
 services:
   minio:
     image: minio/minio
     ports:
-      - "9000:9000"   # S3 API port
-      - "9001:9001"   # Web console
+      - "9000:9000" # S3 API port
+      - "9001:9001" # Web console
     volumes:
       - minio_data:/data
     environment:
@@ -15,14 +15,21 @@ services:
   ollama:
     image: ollama/ollama
     ports:
-      - "11434:11434"  # Ollama API port
+      - "11434:11434" # Ollama API port
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1 # alternatively, use `count: all` for all GPUs
+              capabilities: [gpu]
     volumes:
       - ollama_data:/root/.ollama
   db:
     image: postgres:latest
     container_name: postgres_db
     ports:
-      - "5432:5432"   # PostgreSQL default port
+      - "5432:5432" # PostgreSQL default port
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -32,7 +39,7 @@ services:
   adminer:
     image: adminer
     ports:
-      - "8080:8080"   # Adminer web interface
+      - "8080:8080" # Adminer web interface
 
 volumes:
   minio_data:
