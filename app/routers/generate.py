@@ -14,12 +14,13 @@ async def give_instruction(instruction: str, selected_files: list[int] = [], db:
     if len(selected_files) > 0:
         instructionAndResource += "Resources:\n"
         for fileId in selected_files:
-            instructionAndResource += f"***\n{fileId}\n***\n\n<STARTFILE>\n"
             try:
                 # Get the object name from Database using fileId
                 file_metadata = db.query(FileMetadata).filter(FileMetadata.id == fileId).first()
                 if not file_metadata:
                     raise HTTPException(status_code=404, detail=f"File with ID {fileId} not found.")
+
+                instructionAndResource += f"***\n{file_metadata.filename}\n***\n\n<STARTFILE>\n"
                 object_name = file_metadata.object_name
 
                 # Fetch the file from MinIO
