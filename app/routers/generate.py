@@ -26,20 +26,22 @@ async def give_instruction(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{str(e)}")
-    
+
     response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={
-                "model": "llama3.1",
-                "prompt": instructionAndResource,
-                "stream": stream,
-            },
-            stream=stream,
-        )
+        "http://localhost:11434/api/generate",
+        json={
+            "model": "llama3.1",
+            "prompt": instructionAndResource,
+            "stream": stream,
+        },
+        stream=stream,
+    )
     if stream:
+
         def event_generator():
             for chunk in response.iter_lines():
                 yield chunk
+
         return StreamingResponse(event_generator(), media_type="text/plain")
     else:
         return response.json()
@@ -90,3 +92,32 @@ def process_pdf(file):
 
 def process_text(file):
     return file.read().decode("utf-8")
+
+
+@router.post("/article/")
+async def create_article():
+    try:
+        prompt = """
+        Create a random article then answer only in the JSON format:
+        {
+            "title": "<title>",
+            "tags": ["<tag1>", "<tag2>"],
+            "expectedDuration": "<duration expected to read the article in iso 8601 format>",
+            "content": "<content>"
+        }
+        """
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": "llama3.1",
+                "prompt": prompt,
+                "stream": False,
+            },
+        )
+        # the response have prop "response" which is a json string, Get it in json format
+        response = response.json()
+        response = json.loads(response["response"])
+        print(response)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"{str(e)}")
