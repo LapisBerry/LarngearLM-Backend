@@ -19,11 +19,12 @@ async def give_instruction(
     db: Session = Depends(get_db),
 ):
     try:
-        instructionAndResource = get_instruction_and_resources(
-            instruction,
+        instruction += "\n\n"
+        resourcePrompt = get_instruction_and_resources(
             selected_files,
             db,
         )
+        instructionAndResource = instruction + resourcePrompt
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{str(e)}")
 
@@ -48,13 +49,12 @@ async def give_instruction(
 
 
 def get_instruction_and_resources(
-    instruction: str,
     selected_files: list[int],
     db: Session,
 ):
-    instructionAndResource = instruction + "\n\n"
+    resourcePrompt = ""
     if len(selected_files) > 0:
-        instructionAndResource += "Resources:\n"
+        resourcePrompt += "Resources:\n"
         for fileId in selected_files:
             file_metadata = (
                 db.query(FileMetadata).filter(FileMetadata.id == fileId).first()
@@ -64,7 +64,7 @@ def get_instruction_and_resources(
                     status_code=404, detail=f"File with ID {fileId} not found."
                 )
 
-            instructionAndResource += (
+            resourcePrompt += (
                 f"***\n{file_metadata.filename}\n***\n\n<STARTFILE>\n"
             )
             object_name = file_metadata.object_name
@@ -73,13 +73,13 @@ def get_instruction_and_resources(
             file = client.get_object(bucket_name=bucket_name, object_name=object_name)
 
             if file_metadata.content_type == "application/pdf":
-                instructionAndResource += process_pdf(file)
+                resourcePrompt += process_pdf(file)
             elif file_metadata.content_type == "text/plain":
-                instructionAndResource += process_text(file)
-            instructionAndResource += "<ENDFILE>\n"
+                resourcePrompt += process_text(file)
+            resourcePrompt += "<ENDFILE>\n"
             file.close()
 
-    return instructionAndResource
+    return resourcePrompt
 
 
 def process_pdf(file):
@@ -95,29 +95,48 @@ def process_text(file):
 
 
 @router.post("/article/")
-async def create_article():
+async def create_article(
+    selected_files: list[int] = [],
+    db: Session = Depends(get_db),
+):
     try:
-        prompt = """
-        Create a random article then answer only in the JSON format:
+        basePrompt = """
+        Create a random article based on resources then answer only in the JSON format:
         {
             "title": "<title>",
             "tags": ["<tag1>", "<tag2>"],
-            "expectedDuration": "<duration expected to read the article in iso 8601 format>",
+            "expectedDuration": "<duration expected to read the article in seconds>",
             "content": "<content>"
         }
         """
+
+        resourcePrompt = get_instruction_and_resources(
+            selected_files,
+            db,
+        )
+
+        basePromptAndResource = basePrompt + "\n\n" + resourcePrompt + """
+        \n\n
+        Remember to answer only in the JSON format.
+        {
+            "title": "<title>",
+            "tags": ["<tag1>", "<tag2>"],
+            "expectedDuration": "<duration expected to read the article in integer format in seconds>",
+            "content": "<content>"
+        }"""
+
         response = requests.post(
             "http://localhost:11434/api/generate",
             json={
                 "model": "llama3.1",
-                "prompt": prompt,
+                "prompt": basePromptAndResource,
                 "stream": False,
             },
         )
         # the response have prop "response" which is a json string, Get it in json format
         response = response.json()
-        response = json.loads(response["response"])
-        print(response)
-        return response
+        json_response = json.loads(response["response"])
+        print(json_response)
+        return json_response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{str(e)}")
