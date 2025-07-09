@@ -141,7 +141,7 @@ async def create_website_text(url: str, db: Session = Depends(get_db)):
 
         # Save the website content to MinIO
         client.put_object(
-            bucket_name=bucket_name,
+            bucket_name=RESOURCE_BUCKET_NAME,
             object_name=object_name,
             data=BytesIO(content),
             length=len(content),
@@ -151,7 +151,7 @@ async def create_website_text(url: str, db: Session = Depends(get_db)):
         # Save metadata to the database
         file_metadata = FileMetadata(
             filename=filename,
-            bucket_name=bucket_name,
+            bucket_name=RESOURCE_BUCKET_NAME,
             object_name=object_name,
             content_type="text/plain",
             size=len(content),

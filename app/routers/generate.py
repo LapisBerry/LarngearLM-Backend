@@ -68,7 +68,7 @@ def get_instruction_and_resources(
             object_name = file_metadata.object_name
 
             # Fetch the file from MinIO
-            file = client.get_object(bucket_name=bucket_name, object_name=object_name)
+            file = client.get_object(bucket_name=RESOURCE_BUCKET_NAME, object_name=object_name)
 
             if file_metadata.content_type == "application/pdf":
                 instructionAndResource += process_pdf(file)
