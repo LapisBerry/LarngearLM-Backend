@@ -11,3 +11,13 @@ class FileMetadata(Base):
     content_type = Column(String, nullable=False)
     size = Column(BigInteger, nullable=False)
     created_at = Column(DateTime, default="now()")
+
+class NoteMetadata(Base):
+    __tablename__ = "notes"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    bucket_name = Column(String, nullable=False)
+    object_name = Column(String, nullable=False, unique=True)
+    content_type = Column(String, nullable=False)
+    size = Column(BigInteger, nullable=False)
+    created_at = Column(DateTime, default="now()")

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 import fitz
 import requests
 import json
-from app.utils.minio_client import client, bucket_name
+from app.utils.minio_client import client, RESOURCE_BUCKET_NAME
 from app.database import get_db
 from app.model import FileMetadata
 

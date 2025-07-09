@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import re
 from app.database import get_db
 from app.model import FileMetadata
-from app.utils.minio_client import client, bucket_name
+from app.utils.minio_client import client, RESOURCE_BUCKET_NAME
 
 router = APIRouter()
 
@@ -48,7 +48,7 @@ async def upload_resource(
         object_name = str(uuid.uuid4()) + "_" + uploaded_file.filename
 
         client.put_object(
-            bucket_name=bucket_name,
+            bucket_name=RESOURCE_BUCKET_NAME,
             object_name=object_name,
             data=uploaded_file.file,
             length=uploaded_file.size,
@@ -58,7 +58,7 @@ async def upload_resource(
         # Save metadata to the database
         file_metadata = FileMetadata(
             filename=uploaded_file.filename,
-            bucket_name=bucket_name,
+            bucket_name=RESOURCE_BUCKET_NAME,
             object_name=object_name,
             content_type=uploaded_file.content_type,
             size=uploaded_file.size,
@@ -91,7 +91,7 @@ async def create_youtube_transcript(video_url: str, db: Session = Depends(get_db
 
         # Save the transcript to MinIO
         client.put_object(
-            bucket_name=bucket_name,
+            bucket_name=RESOURCE_BUCKET_NAME,
             object_name=object_name,
             data=BytesIO(content),
             length=len(content),
@@ -101,7 +101,7 @@ async def create_youtube_transcript(video_url: str, db: Session = Depends(get_db
         # Save metadata to the database
         file_metadata = FileMetadata(
             filename=filename,
-            bucket_name=bucket_name,
+            bucket_name=RESOURCE_BUCKET_NAME,
             object_name=object_name,
             content_type="text/plain",
             size=len(content),
@@ -182,7 +182,7 @@ async def delete_resource(fileId: int, db: Session = Depends(get_db)):
 
         filename = file_metadata.filename
         client.remove_object(
-            bucket_name=bucket_name, object_name=file_metadata.object_name
+            bucket_name=RESOURCE_BUCKET_NAME, object_name=file_metadata.object_name
         )
 
         db.delete(file_metadata)
