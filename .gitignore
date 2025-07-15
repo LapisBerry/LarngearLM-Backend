@@ -1,6 +1,9 @@
 # Virtual environment
 .venv/
 
+# Chroma vector store
+chroma_db/
+
 # Python cache files
 __pycache__/
 
