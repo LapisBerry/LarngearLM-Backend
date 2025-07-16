@@ -1,7 +1,8 @@
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
+import chromadb
 
 # Load PDFs from folder
 loader = DirectoryLoader(
@@ -22,10 +23,12 @@ documents = text_splitter.split_documents(docs)
 # Store in Chroma with metadata
 embedding = OllamaEmbeddings(model="nomic-embed-text")
 
-db = Chroma.from_documents(
-    documents,
-    embedding,
-    persist_directory="./chroma_db"
+chroma_client = chromadb.HttpClient(host="localhost", port=8000)
+
+vector_store = Chroma(
+    client=chroma_client,
+    collection_name="my_collection",
+    embedding_function=embedding
 )
 
-db.persist()
+vector_store.add_documents(documents);
