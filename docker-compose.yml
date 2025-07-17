@@ -46,7 +46,6 @@ services:
       - "8000:8000" # ChromaDB API port
     environment:
       - IS_PERSISTENT=TRUE
-      - TELEMETRY=TRUE
     deploy:
       resources:
         reservations:

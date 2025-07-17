@@ -13,7 +13,7 @@ vector_store = Chroma(
 
 retriever = vector_store.as_retriever()
 
-query = "treasure?"
+query = "Playwright documentation?"
 
 results = retriever.invoke(query)
 
