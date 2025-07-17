@@ -2,7 +2,7 @@ import chromadb
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
 
-chroma_client = chromadb.HttpClient(host="localhost", port=8000)
+chroma_client = chromadb.HttpClient(host="localhost", port=8001)
 embedding = OllamaEmbeddings(model="nomic-embed-text")
 
 vector_store = Chroma(

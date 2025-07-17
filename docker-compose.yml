@@ -43,7 +43,7 @@ services:
   chroma-db:
     image: chromadb/chroma
     ports:
-      - "8000:8000" # ChromaDB API port
+      - "8001:8000" # ChromaDB API port
     environment:
       - IS_PERSISTENT=TRUE
     deploy:

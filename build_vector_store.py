@@ -17,7 +17,7 @@ load_dotenv()
 # Initialize embedding and Chroma client
 embedding = OllamaEmbeddings(model="nomic-embed-text")
 text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-chroma_client = chromadb.HttpClient(host="localhost", port=8000)
+chroma_client = chromadb.HttpClient(host="localhost", port=8001)
 vector_store = Chroma(
     client=chroma_client, collection_name="my_collection", embedding_function=embedding
 )
