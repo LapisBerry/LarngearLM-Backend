@@ -13,7 +13,6 @@ from langchain_ollama import OllamaEmbeddings
 
 # Load environment variables
 load_dotenv()
-BASE_LMS_URL = "https://lms-api.larngeartech.com/"
 
 # Initialize embedding and Chroma client
 embedding = OllamaEmbeddings(model="nomic-embed-text")
@@ -26,7 +25,7 @@ vector_store = Chroma(
 
 # Login to LMS and initialize access token
 def signin(username, password):
-    url = f"{BASE_LMS_URL}/auth/signin"
+    url = f"{os.getenv("LMS_API_URL")}/auth/signin"
     payload = {"username": username, "password": password, "rememberMe": True}
     response = requests.post(url, json=payload)
     return response.json()
@@ -39,7 +38,7 @@ access_token = signin(os.getenv("USERNAME"), os.getenv("PASSWORD"))["data"][
 
 # Functions to interact with LMS API
 def getArticleAdmin():
-    url = f"{BASE_LMS_URL}/article-admin/articles"
+    url = f"{os.getenv("LMS_API_URL")}/article-admin/articles"
     headers = {"Authorization": f"Bearer {access_token}", "accept": "application/json"}
     response = requests.get(
         url, headers=headers, params={"pageSize": 60, "current": 1, "filter": {}}
@@ -48,7 +47,7 @@ def getArticleAdmin():
 
 
 def getDatastoreAdmin():
-    url = f"{BASE_LMS_URL}/datastore-admin/datastores"
+    url = f"{os.getenv("LMS_API_URL")}/datastore-admin/datastores"
     headers = {"Authorization": f"Bearer {access_token}", "accept": "application/json"}
     response = requests.get(
         url, headers=headers, params={"pageSize": 60, "current": 1, "filter": {}}
@@ -57,14 +56,14 @@ def getDatastoreAdmin():
 
 
 def getDatastoreAdminSectionById(datastoreId: str):
-    url = f"{BASE_LMS_URL}/datastore-admin/datastores/{datastoreId}/sections"
+    url = f"{os.getenv("LMS_API_URL")}/datastore-admin/datastores/{datastoreId}/sections"
     headers = {"Authorization": f"Bearer {access_token}", "accept": "application/json"}
     response = requests.get(url, headers=headers)
     return response.json()
 
 
 def getAssetStoresBundleData(bundleName: str, refKey: str):
-    url = f"{BASE_LMS_URL}/asset-stores/bundle/{bundleName}/{refKey}"
+    url = f"{os.getenv("LMS_API_URL")}/asset-stores/bundle/{bundleName}/{refKey}"
     headers = {"Authorization": f"Bearer {access_token}", "accept": "application/json"}
     response = requests.get(url, headers=headers)
     return response.json()
@@ -76,7 +75,7 @@ articles = getArticleAdmin()["data"]
 docs = []
 for article in articles:
     if not article["contentHtml"]:
-        print(f"Skipping article {article['id']} due to missing content.")
+        print(f"Skipping article {article["id"]} due to missing content.")
         continue
     content_html = article["contentHtml"]
     soup = bs4.BeautifulSoup(content_html, "html.parser")
@@ -113,7 +112,7 @@ for datastore in datastores:
                 pdf_response = requests.get(url)
                 if pdf_response.status_code == 200:
                     # Save the PDF to a temporary file
-                    pdf_path = f"temp_{datastoreUnit['id']}.pdf"
+                    pdf_path = f"temp_{datastoreUnit["id"]}.pdf"
                     with open(pdf_path, "wb") as f:
                         f.write(pdf_response.content)
 
