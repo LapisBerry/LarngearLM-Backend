@@ -40,8 +40,24 @@ services:
     image: adminer
     ports:
       - "8080:8080" # Adminer web interface
+  chroma-db:
+    image: chromadb/chroma
+    ports:
+      - "8001:8000" # ChromaDB API port
+    environment:
+      - IS_PERSISTENT=TRUE
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all # alternatively, use `count: all` for all GPUs
+              capabilities: [gpu]
+    volumes:
+      - chroma_data:/data
 
 volumes:
   minio_data:
   ollama_data:
   postgres_data:
+  chroma_data:
