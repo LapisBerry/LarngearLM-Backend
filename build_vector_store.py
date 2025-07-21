@@ -31,7 +31,7 @@ def signin(username, password):
     return response.json()
 
 
-access_token = signin(os.getenv("USERNAME"), os.getenv("PASSWORD"))["data"][
+access_token = signin(os.getenv("USERNAME_LMS"), os.getenv("PASSWORD_LMS"))["data"][
     "accessToken"
 ]
 
