@@ -28,14 +28,14 @@ async def getArticleById(article_id: str):
     return response.json()
 
 
-@router.get("/asset-stores/bundle/{bundleName}/{refkey}")
-async def getAssetStoreBundle(bundleName: str, refkey: str):
+@router.get("/asset-stores/bundle/{bundleName}/{refKey}")
+async def getAssetStoreBundle(bundleName: str, refKey: str):
     access_token = signin(os.getenv("USERNAME_LMS"), os.getenv("PASSWORD_LMS"))["data"][
         "accessToken"
     ]
     headers = {"Authorization": f"Bearer {access_token}"}
     response = requests.get(
-        f"{os.getenv('LMS_API_URL')}/asset-stores/bundle/{bundleName}/{refkey}",
+        f"{os.getenv('LMS_API_URL')}/asset-stores/bundle/{bundleName}/{refKey}",
         headers=headers,
     )
     return response.json()
@@ -48,7 +48,7 @@ async def queryResources(query: str):
 
 
 @router.post("/use-lms-resource")
-async def useLmsResource(type: int, fileName: str, articleId: str = None, bundleName: str = None, refkey: str = None, db: Session = Depends(get_db)):
+async def useLmsResource(type: int, fileName: str, articleId: str = None, bundleName: str = None, refKey: str = None, db: Session = Depends(get_db)):
     if type == 0 and articleId:
         response = await getArticleById(articleId)
         content_html = response["data"]["contentHtml"]
@@ -59,8 +59,8 @@ async def useLmsResource(type: int, fileName: str, articleId: str = None, bundle
         headers = {"content-type": "text/plain; charset=utf-8"}
         uploaded_file = UploadFile(filename=fileName, file=byteio_content, size=len(content_bytes), headers=headers)
         return await upload_resource(uploaded_file=uploaded_file, db=db)
-    elif type == 1 and bundleName and refkey:
-        response = await getAssetStoreBundle(bundleName, refkey)
+    elif type == 1 and bundleName and refKey:
+        response = await getAssetStoreBundle(bundleName, refKey)
         pdfUrl = response["data"]
         content = requests.get(pdfUrl).content
         file = io.BytesIO(content)
