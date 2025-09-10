@@ -74,7 +74,7 @@ def get_instruction_and_resources(
 
             if file_metadata.content_type == "application/pdf":
                 resourcePrompt += process_pdf(file)
-            elif file_metadata.content_type == "text/plain":
+            elif file_metadata.content_type == "text/plain" or file_metadata.content_type == "text/plain; charset=utf-8":
                 resourcePrompt += process_text(file)
             resourcePrompt += "<ENDFILE>\n"
             file.close()
